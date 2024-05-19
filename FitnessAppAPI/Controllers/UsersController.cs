@@ -1,4 +1,5 @@
 ﻿using FitnessAppAPI.Models;
+using FitnessAppAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FitnessAppAPI.Controllers;

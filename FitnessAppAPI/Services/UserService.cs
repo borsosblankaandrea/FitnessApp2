@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace FitnessAppAPI
+namespace FitnessAppAPI.Services
 {
     public class UserService
     {

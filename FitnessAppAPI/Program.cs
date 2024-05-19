@@ -1,5 +1,5 @@
-using FitnessAppAPI;
 using FitnessAppAPI.Models;
+using FitnessAppAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
