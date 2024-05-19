@@ -12,7 +12,7 @@ namespace FitnessAppAPI.Services
         {
             var mongoClient = new MongoClient(fitnessAppDatabaseSetting.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(fitnessAppDatabaseSetting.Value.DatabaseName);
-            _usersCollection = mongoDatabase.GetCollection<Users>(fitnessAppDatabaseSetting.Value.CollectionName);
+            _usersCollection = mongoDatabase.GetCollection<Users>(fitnessAppDatabaseSetting.Value.UsersCollectionName);
         }
 
         public async Task<List<Users>> GetAllEntries() =>

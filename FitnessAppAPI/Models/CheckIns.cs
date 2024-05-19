@@ -8,7 +8,7 @@ namespace FitnessAppAPI.Models
         [BsonId]
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
         public string? _id { get; set; }
-        public DateTime? checkin_date { get; set; } = DateTime.MinValue;
+        public DateTime? checkin_date { get; set; } = DateTime.UtcNow;
 
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
         public string? user_membership_id { get; set; }

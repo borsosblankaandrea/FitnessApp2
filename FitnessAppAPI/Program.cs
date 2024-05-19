@@ -12,6 +12,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<DatabaseSetting>(builder.Configuration.GetSection("FitnessAppDatabase"));
 builder.Services.AddSingleton<UserService>();
+builder.Services.AddSingleton<MembershipsService>();
+builder.Services.AddSingleton<UserMembershipsService>();
+builder.Services.AddSingleton<CheckInsService>();
 
 var app = builder.Build();
 
