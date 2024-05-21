@@ -1,0 +1,27 @@
+﻿@page "/users"
+@using FitnessAppAPI.Models
+
+@inject HttpClient HttpClient
+
+<h1>Users</h1>
+
+@if (Users != null)
+{
+    foreach (var user in Users)
+    {
+        <p>@user.name - @user.email</p>
+    }
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    List<Users> Users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Users = await HttpClient.GetFromJsonAsync<List<Users>>("api/users");
+    }
+}
