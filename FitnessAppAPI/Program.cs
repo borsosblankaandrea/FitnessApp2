@@ -11,7 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<DatabaseSetting>(builder.Configuration.GetSection("FitnessAppDatabase"));
-builder.Services.AddSingleton<UserService>();
+builder.Services.AddSingleton<UsersService>();
 builder.Services.AddSingleton<MembershipsService>();
 builder.Services.AddSingleton<UserMembershipsService>();
 builder.Services.AddSingleton<CheckInsService>();

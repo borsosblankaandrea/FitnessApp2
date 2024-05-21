@@ -8,9 +8,9 @@ namespace FitnessAppAPI.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
     {
-        private readonly UserService _UserService;
+        private readonly UsersService _UserService;
 
-        public UsersController(UserService userService)
+        public UsersController(UsersService userService)
         {
                _UserService = userService;
         }

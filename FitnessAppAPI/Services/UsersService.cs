@@ -4,11 +4,11 @@ using MongoDB.Driver;
 
 namespace FitnessAppAPI.Services
 {
-    public class UserService
+    public class UsersService
     {
         public readonly IMongoCollection<Users> _usersCollection;
 
-        public UserService(IOptions<DatabaseSetting> fitnessAppDatabaseSetting)
+        public UsersService(IOptions<DatabaseSetting> fitnessAppDatabaseSetting)
         {
             var mongoClient = new MongoClient(fitnessAppDatabaseSetting.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(fitnessAppDatabaseSetting.Value.DatabaseName);
