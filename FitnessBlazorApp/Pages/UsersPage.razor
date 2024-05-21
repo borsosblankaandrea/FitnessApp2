@@ -1,16 +1,38 @@
 ﻿@page "/users"
 @using FitnessAppAPI.Models
+@using FitnessAppAPI.Services
 
-@inject HttpClient HttpClient
+@inject UsersService service
 
 <h1>Users</h1>
 
-@if (Users != null)
+@if (users != null && users.Any())
 {
-    foreach (var user in Users)
-    {
-        <p>@user.name - @user.email</p>
-    }
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>CNP</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Password</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.name</td>
+                    <td>@user.CNP</td>
+                    <td>@user.email</td>
+                    <td>@user.phone</td>
+                    <td>@user.address</td>
+                    <td>@user.password</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 else
 {
@@ -18,10 +40,10 @@ else
 }
 
 @code {
-    List<Users> Users;
+    List<Users> users;
 
     protected override async Task OnInitializedAsync()
     {
-        Users = await HttpClient.GetFromJsonAsync<List<Users>>("api/users");
+        users = await service.GetAllEntries();
     }
 }

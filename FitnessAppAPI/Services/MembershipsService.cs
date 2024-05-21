@@ -10,9 +10,17 @@ namespace FitnessAppAPI.Services
 
         public MembershipsService(IOptions<DatabaseSetting> fitnessAppDatabaseSetting)
         {
-            var mongoClient = new MongoClient(fitnessAppDatabaseSetting.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(fitnessAppDatabaseSetting.Value.DatabaseName);
-            _membershipsCollection = mongoDatabase.GetCollection<Memberships>(fitnessAppDatabaseSetting.Value.MembershipsCollectionName);
+            var connectionString = "mongodb+srv://user:passwordka123@cluster0.lfiztow.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+            var databaseName = "FitnessDatabase";
+
+            var mongoClient = new MongoClient(connectionString);
+            var mongoDatabase = mongoClient.GetDatabase(databaseName);
+            _membershipsCollection = mongoDatabase.GetCollection<Memberships>("Memberships");
+
+
+            //var mongoClient = new MongoClient(fitnessAppDatabaseSetting.Value.ConnectionString);
+            //var mongoDatabase = mongoClient.GetDatabase(fitnessAppDatabaseSetting.Value.DatabaseName);
+            //_membershipsCollection = mongoDatabase.GetCollection<Memberships>(fitnessAppDatabaseSetting.Value.MembershipsCollectionName);
         }
 
         public async Task<List<Memberships>> GetAllMemberships() =>

@@ -11,9 +11,16 @@ namespace FitnessAppAPI.Services
 
         public CheckInsService(IOptions<DatabaseSetting> fitnessAppDatabaseSetting)
         {
-            var mongoClient = new MongoClient(fitnessAppDatabaseSetting.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(fitnessAppDatabaseSetting.Value.DatabaseName);
+            var connectionString = "mongodb+srv://user:passwordka123@cluster0.lfiztow.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+            var databaseName = "FitnessDatabase";
+
+            var mongoClient = new MongoClient(connectionString);
+            var mongoDatabase = mongoClient.GetDatabase(databaseName);
             _checkInsCollection = mongoDatabase.GetCollection<CheckIns>("CheckIns");
+
+            //var mongoClient = new MongoClient(fitnessAppDatabaseSetting.Value.ConnectionString);
+            //var mongoDatabase = mongoClient.GetDatabase(fitnessAppDatabaseSetting.Value.DatabaseName);
+            //_checkInsCollection = mongoDatabase.GetCollection<CheckIns>("CheckIns");
         }
 
         public async Task<List<CheckIns>> GetAllEntries() =>
