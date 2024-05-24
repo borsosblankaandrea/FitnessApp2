@@ -1,0 +1,47 @@
+﻿@page "/usermemberships"
+@using FitnessAppAPI.Models
+@using FitnessAppAPI.Services
+
+@inject UserMembershipsService service
+
+<h1>User Memberships</h1>
+
+@if (userMemberships != null && userMemberships.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Membership ID</th>
+                <th>Purchase Date</th>
+                <th>Check-in Count</th>
+                <th>Active</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var userMembership in userMemberships)
+            {
+                <tr>
+                    <td>@userMembership.user_id</td>
+                    <td>@userMembership.membership_id</td>
+                    <td>@userMembership.purchase_date?.ToString("yyyy-MM-dd")</td>
+                    <td>@userMembership.checkin_count</td>
+                    <td>@(userMembership.active == true ? "Yes" : "No")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    List<UserMemberships> userMemberships;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userMemberships = await service.GetAllEntries();
+    }
+}

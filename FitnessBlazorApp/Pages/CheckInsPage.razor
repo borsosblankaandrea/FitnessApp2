@@ -1,0 +1,41 @@
+﻿@page "/checkins"
+@using FitnessAppAPI.Models
+@using FitnessAppAPI.Services
+
+@inject CheckInsService service
+
+<h1>Check-Ins</h1>
+
+@if (checkIns != null && checkIns.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Check-In Date</th>
+                <th>User Membership ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var checkIn in checkIns)
+            {
+                <tr>
+                    <td>@checkIn.checkin_date?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@checkIn.user_membership_id</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    List<CheckIns> checkIns;
+
+    protected override async Task OnInitializedAsync()
+    {
+        checkIns = await service.GetAllEntries();
+    }
+}

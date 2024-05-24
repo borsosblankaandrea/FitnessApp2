@@ -1,0 +1,45 @@
+﻿@page "/memberships"
+@using FitnessAppAPI.Models
+@using FitnessAppAPI.Services
+
+@inject MembershipsService service
+
+<h1>Bérletek</h1>
+
+@if (memberships != null && memberships.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Megnevezés</th>
+                <th>Ár</th>
+                <th>Hány napig érvényes</th>
+                <th>Hány belépésre érvényes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var membership in memberships)
+            {
+                <tr>
+                    <td>@membership.megnevezes</td>
+                    <td>@membership.ar</td>
+                    <td>@membership.hanynapigervenyes</td>
+                    <td>@(membership.hanybelepesreervenyes == 0 ? "Korlátlan" : membership.hanybelepesreervenyes.ToString())</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    List<Memberships> memberships;
+
+    protected override async Task OnInitializedAsync()
+    {
+        memberships = await service.GetAllMemberships();
+    }
+}

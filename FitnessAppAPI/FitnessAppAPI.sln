@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FitnessAppAPI", "FitnessAppAPI.csproj", "{0DA25495-2A1D-490C-A51D-3730962D5FBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitnessBlazorApp", "..\FitnessBlazorApp\FitnessBlazorApp.csproj", "{45EBB00D-4A60-48E1-85E7-743EF16FCB8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FitnessBlazorApp", "..\FitnessBlazorApp\FitnessBlazorApp.csproj", "{45EBB00D-4A60-48E1-85E7-743EF16FCB8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
