@@ -6,6 +6,21 @@
 
 <h1>Bérletek</h1>
 
+<div class="row mb-3" style="width: 65%;">
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Megnevezés keresése" @bind="megnevezesFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Ár keresése" @bind="arFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Érvényesség keresése" @bind="ervenyessegFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Belépések számának keresése" @bind="belepesekFilter" />
+    </div>
+</div>
+
 @if (memberships != null && memberships.Any())
 {
     <table class="table">
@@ -15,16 +30,24 @@
                 <th>Ár</th>
                 <th>Hány napig érvényes</th>
                 <th>Hány belépésre érvényes</th>
+                <th>Műveletek</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var membership in memberships)
+            @foreach (var membership in memberships.Where(m => string.IsNullOrWhiteSpace(megnevezesFilter) || m.megnevezes.Contains(megnevezesFilter, StringComparison.OrdinalIgnoreCase))
+                                                   .Where(m => string.IsNullOrWhiteSpace(arFilter) || m.ar.ToString().Contains(arFilter, StringComparison.OrdinalIgnoreCase))
+                                                   .Where(m => string.IsNullOrWhiteSpace(ervenyessegFilter) || m.hanynapigervenyes.ToString().Contains(ervenyessegFilter, StringComparison.OrdinalIgnoreCase))
+                                                   .Where(m => string.IsNullOrWhiteSpace(belepesekFilter) || (m.hanybelepesreervenyes == 0 ? "Korlátlan" : m.hanybelepesreervenyes.ToString()).Contains(belepesekFilter, StringComparison.OrdinalIgnoreCase)))
             {
                 <tr>
                     <td>@membership.megnevezes</td>
                     <td>@membership.ar</td>
                     <td>@membership.hanynapigervenyes</td>
                     <td>@(membership.hanybelepesreervenyes == 0 ? "Korlátlan" : membership.hanybelepesreervenyes.ToString())</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteMembership(membership._id)">Törlés</button>
+                        <button class="btn btn-primary" @onclick="() => EditMembership(membership)">Szerkesztés</button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -35,11 +58,108 @@ else
     <p>Loading...</p>
 }
 
+@if (editingMembership != null)
+{
+    <div>
+        <h3>Szerkesztés</h3>
+        <div class="mb-3">
+            <label for="megnevezes" class="form-label">Megnevezés:</label>
+            <input id="megnevezes" @bind="editingMembership.megnevezes" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="ar" class="form-label">Ár:</label>
+            <input id="ar" @bind="editingMembership.ar" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="ervenyesseg" class="form-label">Érvényesség (nap):</label>
+            <input id="ervenyesseg" @bind="editingMembership.hanynapigervenyes" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="belepesek" class="form-label">Belépések száma:</label>
+            <input id="belepesek" @bind="editingMembership.hanybelepesreervenyes" class="form-control" />
+        </div>
+        <button class="btn btn-secondary" @onclick="CancelEdit">Mégse</button>
+        <button class="btn btn-primary" @onclick="SaveEdit">Mentés</button>
+    </div>
+}
+
+<br />
+<h3>Új bérlet hozzáadása</h3>
+<table class="table" style="width: 50%;">
+    <tr>
+        <td><label>Megnevezés:</label></td>
+        <td><input type="text" @bind="newMembership.megnevezes" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td><label>Ár:</label></td>
+        <td><input type="number" @bind="newMembership.ar" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td><label>Érvényesség (nap):</label></td>
+        <td><input type="number" @bind="newMembership.hanynapigervenyes" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td><label>Belépések száma:</label></td>
+        <td><input type="number" @bind="newMembership.hanybelepesreervenyes" class="form-control" /></td>
+    </tr>
+</table>
+<button @onclick="AddMembership" class="btn btn-primary">Hozzáadás</button>
+
 @code {
     List<Memberships> memberships;
+    Memberships newMembership = new Memberships();
+    Memberships editingMembership;
+
+    string megnevezesFilter = "";
+    string arFilter = "";
+    string ervenyessegFilter = "";
+    string belepesekFilter = "";
 
     protected override async Task OnInitializedAsync()
     {
         memberships = await service.GetAllMemberships();
+    }
+
+    private async Task AddMembership()
+    {
+        await service.CreateMembership(newMembership);
+        memberships = await service.GetAllMemberships();
+        newMembership = new Memberships(); // Reset the form
+    }
+
+    private async Task DeleteMembership(string membershipId)
+    {
+        await service.RemoveMembership(membershipId);
+        await RefreshMemberships();
+    }
+
+    private void EditMembership(Memberships membership)
+    {
+        editingMembership = new Memberships
+            {
+                megnevezes = membership.megnevezes,
+                ar = membership.ar,
+                hanynapigervenyes = membership.hanynapigervenyes,
+                hanybelepesreervenyes = membership.hanybelepesreervenyes
+            };
+    }
+
+
+    private async Task SaveEdit()
+    {
+        await service.UpdateMembership(editingMembership._id, editingMembership);
+        await RefreshMemberships();
+        editingMembership = null;
+    }
+
+    private void CancelEdit()
+    {
+        editingMembership = null;
+    }
+
+    private async Task RefreshMemberships()
+    {
+        memberships = await service.GetAllMemberships();
+        StateHasChanged();
     }
 }

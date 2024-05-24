@@ -2,13 +2,33 @@
 @using FitnessAppAPI.Models
 @using FitnessAppAPI.Services
 
+
 @inject UsersService service
 
 <h1>Kliensek</h1>
 
+
+<div class="row mb-3" style="width: 65%;" >
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Név keresése" @bind="nameFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="CNP keresése" @bind="cnpFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Email keresése" @bind="emailFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Telefonszám keresése" @bind="phoneFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Lakcim keresése" @bind="addressFilter" />
+    </div>
+</div>
+
 @if (users != null && users.Any())
 {
-    <table class="table">
+    <table class="table"  >
         <thead>
             <tr>
                 <th>Név</th>
@@ -17,10 +37,15 @@
                 <th>Telefonszám</th>
                 <th>Lakcím</th>
                 <th>Jelszó</th>
+                <th>Műveletek</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var user in users)
+            @foreach (var user in users.Where(u => string.IsNullOrWhiteSpace(nameFilter) || u.name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase))
+           .Where(u => string.IsNullOrWhiteSpace(cnpFilter) || u.CNP.Contains(cnpFilter, StringComparison.OrdinalIgnoreCase))
+           .Where(u => string.IsNullOrWhiteSpace(emailFilter) || u.email.Contains(emailFilter, StringComparison.OrdinalIgnoreCase))
+           .Where(u => string.IsNullOrWhiteSpace(phoneFilter) || u.phone.Contains(phoneFilter, StringComparison.OrdinalIgnoreCase))
+           .Where(u => string.IsNullOrWhiteSpace(addressFilter) || u.address.Contains(addressFilter, StringComparison.OrdinalIgnoreCase)))
             {
                 <tr>
                     <td>@user.name</td>
@@ -29,21 +54,150 @@
                     <td>@user.phone</td>
                     <td>@user.address</td>
                     <td>@user.password</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteUser(user._id)">Törlés</button>
+                        <button class="btn btn-primary" @onclick="() => EditUser(user)">Szerkesztés</button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
+
 }
 else
 {
     <p>Loading...</p>
 }
 
+@if (editingUser != null)
+{
+    <div>
+        <h3>Szerkesztés</h3>
+        <div class="mb-3">
+            <label for="name" class="form-label">Név:</label>
+            <InputText id="name" @bind-Value="editingUser.name" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="cnp" class="form-label">CNP:</label>
+            <InputText id="cnp" @bind-Value="editingUser.CNP" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <InputText id="email" @bind-Value="editingUser.email" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label">Telefonszám:</label>
+            <InputText id="phone" @bind-Value="editingUser.phone" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="address" class="form-label">Lakcím:</label>
+            <InputText id="address" @bind-Value="editingUser.address" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Jelszó:</label>
+            <InputText id="password" @bind-Value="editingUser.password" class="form-control" />
+        </div>
+        <button class="btn btn-secondary" @onclick="CancelEdit">Mégse</button>
+        <button class="btn btn-primary" @onclick="SaveEdit">Mentés</button>
+    </div>
+}
+
+
+
+<br />
+<h3>Új felhasználó hozzáadása</h3>
+<table class="table" style="width: 50%;">
+    <tr>
+        <td><label>Név:</label></td>
+        <td><input type="text" @bind="newUser.name" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td><label>CNP:</label></td>
+        <td><input type="text" @bind="newUser.CNP" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td><label>Email:</label></td>
+        <td><input type="text" @bind="newUser.email" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td><label>Telefonszám:</label></td>
+        <td><input type="text" @bind="newUser.phone" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td><label>Lakcím:</label></td>
+        <td><input type="text" @bind="newUser.address" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td><label>Jelszó:</label></td>
+        <td><input type="text" @bind="newUser.password" class="form-control" /></td>
+    </tr>
+</table>
+<button @onclick="AddUser" class="btn btn-primary">Hozzáadás</button>
+
 @code {
     List<Users> users;
+    Users newUser = new Users();
+    Users editingUser;
+
+    string nameFilter = "";
+    string cnpFilter = "";
+    string emailFilter = "";
+    string phoneFilter = "";
+    string addressFilter = "";
 
     protected override async Task OnInitializedAsync()
     {
         users = await service.GetAllEntries();
+    }
+
+    private async Task AddUser()
+    {
+        if (!string.IsNullOrWhiteSpace(newUser.CNP) && !string.IsNullOrWhiteSpace(newUser.email) && !string.IsNullOrWhiteSpace(newUser.password))
+        {
+            await service.CreateEntry(newUser);
+            users = await service.GetAllEntries();
+            newUser = new Users(); // Reset the form
+        }
+    }
+
+    private async Task DeleteUser(string userId)
+    {
+        await service.RemoveEntry(userId);
+
+        await RefreshUsers();
+    }
+
+    private void EditUser(Users user)
+    {
+        editingUser = new Users
+            {
+                _id = user._id,
+                name = user.name,
+                CNP = user.CNP,
+                email = user.email,
+                phone = user.phone,
+                address = user.address,
+                password = user.password
+            };
+    }
+
+
+    private async Task SaveEdit()
+    {
+        // Implementálj egy függvényt, ami elmenti a szerkesztett felhasználó adatait az adatbázisban
+        await service.UpdateEntry(editingUser._id, editingUser);
+        await RefreshUsers();
+        editingUser = null;
+    }
+
+    private void CancelEdit()
+    {
+        editingUser = null;
+    }
+
+    private async Task RefreshUsers()
+    {
+        users = await service.GetAllEntries();
+        StateHasChanged();
     }
 }
