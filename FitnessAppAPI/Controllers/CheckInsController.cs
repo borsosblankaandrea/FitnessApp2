@@ -11,10 +11,12 @@ namespace FitnessAppAPI.Controllers
     public class CheckInsController : ControllerBase
     {
         private readonly CheckInsService _checkInsService;
+        private readonly UserMembershipsService _userMembershipsService;
 
-        public CheckInsController(CheckInsService checkInsService)
+        public CheckInsController(CheckInsService checkInsService, UserMembershipsService userMembershipsService)
         {
             _checkInsService = checkInsService;
+            _userMembershipsService = userMembershipsService;
         }
 
         [HttpGet]
@@ -35,6 +37,14 @@ namespace FitnessAppAPI.Controllers
         public async Task<IActionResult> Post(CheckIns newCheckIn)
         {
             await _checkInsService.CreateEntry(newCheckIn);
+            var userMembership = await _userMembershipsService.GetEntryById(newCheckIn.user_membership_id);
+
+            if (userMembership != null)
+            {
+                userMembership.checkin_count++;
+                await _userMembershipsService.UpdateEntry(userMembership._id, userMembership);
+            }
+
             return CreatedAtAction(nameof(GetById), new { id = newCheckIn._id }, newCheckIn);
         }
 

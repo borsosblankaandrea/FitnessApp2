@@ -35,7 +35,11 @@ namespace FitnessAppAPI.Services
         public async Task UpdateEntry(string id, UserMemberships updatedUserMemberships) =>
             await _userMembershipsCollection.ReplaceOneAsync(x => x._id == id, updatedUserMemberships);
 
+
+
         public async Task RemoveEntry(string id) =>
             await _userMembershipsCollection.DeleteOneAsync(x => x._id == id);
+
+
     }
 }
