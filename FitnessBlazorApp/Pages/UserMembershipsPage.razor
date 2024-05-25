@@ -7,11 +7,21 @@
 
 <h1>Felhasználói bérletek</h1>
 
+<div class="row mb-3" style="width: 65%;">
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Név keresése" @bind="nameFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="CNP keresése" @bind="cnpFilter" />
+    </div>
+</div>
+
 @if (userMemberships != null && userMemberships.Any())
 {
     <table class="table">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Név</th>
                 <th>CNP</th>
                 <th>Bérlet megnevezése</th>
@@ -22,9 +32,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var userMembership in userMemberships)
+            @foreach (var userMembership in userMemberships.Where(u => string.IsNullOrWhiteSpace(nameFilter) || u.name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase))
+           .Where(u => string.IsNullOrWhiteSpace(cnpFilter) || u.CNP.Contains(cnpFilter, StringComparison.OrdinalIgnoreCase)))
             {
                 <tr>
+                    <td>@userMembership._id</td>
                     <td>@userMembership.name</td>
                     <td>@userMembership.CNP</td>
                     <td>@userMembership.megnevezes</td>
@@ -87,6 +99,9 @@ else
     Users? selectedUser;
     string searchCNP;
     string selectedMembershipId;
+
+    string nameFilter = "";
+    string cnpFilter = "";
 
     protected override async Task OnInitializedAsync()
     {

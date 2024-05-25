@@ -12,5 +12,17 @@ namespace FitnessAppAPI.Models
 
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
         public string? user_membership_id { get; set; }
+
+
+        [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
+        public string? user_id { get; set; }
+        public string? name { get; set; }
+        public string? CNP { get; set; }
+
+
+        [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
+        public string? membership_id { get; set; }
+
+        public string? megnevezes { get; set; }
     }
 }

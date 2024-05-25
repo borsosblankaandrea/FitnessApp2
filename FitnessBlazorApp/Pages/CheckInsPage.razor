@@ -1,18 +1,32 @@
 ﻿@page "/checkins"
 @using FitnessAppAPI.Models
 @using FitnessAppAPI.Services
+@inject CheckInsService checkInsService
+@inject UserMembershipsService userMembershipsService
 
-@inject CheckInsService service
+<h1>Bejelentkezések</h1>
 
-<h1>Check-Ins</h1>
+<h3>Bejelentkezés</h3>
+<div class="mb-3" style="width: 25%">
+    <label for="userMembershipId" class="form-label">User Membership ID:</label>
+    <div class="input-group mb-3">
+		<input type="text" id="userMembershipId" class="form-control" @bind="userMembershipId" />
+        <button class="btn btn-primary" @onclick="AddCheckIn">Bejelentkezés</button>
+    </div>
+    
+</div>
 
+
+<br />
 @if (checkIns != null && checkIns.Any())
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Check-In Date</th>
-                <th>User Membership ID</th>
+                <th>Bejelentkezés dátuma</th>
+                <th>Név</th>
+                <th>CNP</th>
+                <th>Bérlet megnevezés</th>
             </tr>
         </thead>
         <tbody>
@@ -20,7 +34,9 @@
             {
                 <tr>
                     <td>@checkIn.checkin_date?.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                    <td>@checkIn.user_membership_id</td>
+                    <td>@checkIn.name</td>
+                    <td>@checkIn.CNP</td>
+                    <td>@checkIn.megnevezes</td>
                 </tr>
             }
         </tbody>
@@ -31,11 +47,57 @@ else
     <p>Loading...</p>
 }
 
+
 @code {
     List<CheckIns> checkIns;
+    string userMembershipId;
 
     protected override async Task OnInitializedAsync()
     {
-        checkIns = await service.GetAllEntries();
+        checkIns = await checkInsService.GetAllEntries();
+    }
+
+    private async Task AddCheckIn()
+    {
+        if (!string.IsNullOrWhiteSpace(userMembershipId))
+        {
+            try
+            {
+                var userMembership = await userMembershipsService.GetEntryById(userMembershipId);
+                if (userMembership != null)
+                {
+                    var checkIn = new CheckIns
+                        {
+                            name = userMembership.name,
+                            CNP = userMembership.CNP,
+                            membership_id = userMembership.membership_id,
+                            megnevezes = userMembership.megnevezes,
+                            checkin_date = DateTime.UtcNow
+                        };
+
+                    await checkInsService.CreateEntry(checkIn);
+                    await RefreshCheckIns();
+                    userMembershipId = ""; 
+                }
+                else
+                {
+                    Console.WriteLine("User membership not found with the provided ID.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding check-in: {ex.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("User membership ID is empty.");
+        }
+    }
+
+    private async Task RefreshCheckIns()
+    {
+        checkIns = await checkInsService.GetAllEntries();
+        StateHasChanged();
     }
 }
