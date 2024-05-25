@@ -10,10 +10,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
-builder.Services.AddSingleton<UsersService>();
-builder.Services.AddSingleton<MembershipsService>();
-builder.Services.AddSingleton<UserMembershipsService>();
-builder.Services.AddSingleton<CheckInsService>();
+builder.Services.AddScoped<UsersService>();
+builder.Services.AddScoped<MembershipsService>();
+builder.Services.AddScoped<UserMembershipsService>();
+builder.Services.AddScoped<CheckInsService>();
+
 
 
 var app = builder.Build();

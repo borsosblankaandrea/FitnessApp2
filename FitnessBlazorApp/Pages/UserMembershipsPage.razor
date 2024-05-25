@@ -1,32 +1,39 @@
 ﻿@page "/usermemberships"
 @using FitnessAppAPI.Models
 @using FitnessAppAPI.Services
+@inject UserMembershipsService userMembershipsService
+@inject UsersService usersService
+@inject MembershipsService membershipsService
 
-@inject UserMembershipsService service
-
-<h1>User Memberships</h1>
+<h1>Felhasználói bérletek</h1>
 
 @if (userMemberships != null && userMemberships.Any())
 {
     <table class="table">
         <thead>
             <tr>
-                <th>User ID</th>
-                <th>Membership ID</th>
-                <th>Purchase Date</th>
-                <th>Check-in Count</th>
-                <th>Active</th>
+                <th>Név</th>
+                <th>CNP</th>
+                <th>Bérlet megnevezése</th>
+                <th>Előfizetés dátuma</th>
+                <th>Bejelentkezés számláló</th>
+                <th>Aktív</th>
+                <th>Műveletek</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var userMembership in userMemberships)
             {
                 <tr>
-                    <td>@userMembership.user_id</td>
-                    <td>@userMembership.membership_id</td>
+                    <td>@userMembership.name</td>
+                    <td>@userMembership.CNP</td>
+                    <td>@userMembership.megnevezes</td>
                     <td>@userMembership.purchase_date?.ToString("yyyy-MM-dd")</td>
                     <td>@userMembership.checkin_count</td>
-                    <td>@(userMembership.active == true ? "Yes" : "No")</td>
+                    <td>@(userMembership.active == true ? "Aktív" : "Inaktív")</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteUserMembership(userMembership._id)">Törlés</button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -37,11 +44,162 @@ else
     <p>Loading...</p>
 }
 
+<h3>Új felhasználói bérlet hozzáadása</h3>
+<div class="mb-3" style="width: 25%">
+    <label for="cnpSearch" class="form-label">CNP keresése:</label>
+    <div class="input-group mb-3">
+        <input type="text" id="cnpSearch" class="form-control" @bind="searchCNP" />
+        <button class="btn btn-primary" @onclick="SearchUserByCNP">Keresés</button>
+    </div>
+
+    
+</div>
+
+<div class="mb-3" style="width: 25%">
+    <label for="userName" class="form-label">Felhasználó neve:</label>
+    <input type="text" id="userName" class="form-control" value="@selectedUser?.name" disabled />
+</div>
+<div class="mb-3" style="width: 25%">
+    <label for="membershipSelect" class="form-label">Bérlet kiválasztása:</label>
+    <select id="membershipSelect" class="form-select" @bind="selectedMembershipId">
+        <option disabled selected>Select membership</option>
+        @if (memberships != null && memberships.Any())
+        {
+            @foreach (var membership in memberships)
+            {
+                <option value="@membership._id">@membership.megnevezes</option>
+            }
+        }
+        else
+        {
+            <option disabled>Loading memberships...</option>
+        }
+    </select>
+</div>
+<button class="btn btn-primary" @onclick="AddUserMembership">Hozzáadás</button>
+
+<br />
+<br />
+
 @code {
     List<UserMemberships> userMemberships;
+    List<Memberships> memberships;
+    Users? selectedUser;
+    string searchCNP;
+    string selectedMembershipId;
 
     protected override async Task OnInitializedAsync()
     {
-        userMemberships = await service.GetAllEntries();
+        try
+        {
+            userMemberships = await userMembershipsService.GetAllEntries();
+            memberships = await membershipsService.GetAllMemberships();
+            Console.WriteLine("User memberships and memberships loaded successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteUserMembership(string userMembershipId)
+    {
+        try
+        {
+            await userMembershipsService.RemoveEntry(userMembershipId);
+            await RefreshUserMemberships();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting user membership: {ex.Message}");
+        }
+    }
+
+    private async Task RefreshUserMemberships()
+    {
+        try
+        {
+            userMemberships = await userMembershipsService.GetAllEntries();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error refreshing user memberships: {ex.Message}");
+        }
+    }
+
+    private async Task SearchUserByCNP()
+    {
+        if (!string.IsNullOrWhiteSpace(searchCNP))
+        {
+            try
+            {
+                selectedUser = await usersService.GetEntryByCnp(searchCNP);
+                if (selectedUser != null)
+                {
+                    Console.WriteLine($"User found: {selectedUser.name}");
+                }
+                else
+                {
+                    Console.WriteLine("No user found with the provided CNP.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error searching user by CNP: {ex.Message}");
+                selectedUser = null;
+            }
+        }
+        else
+        {
+            selectedUser = null;
+        }
+    }
+
+
+    private async Task AddUserMembership()
+    {
+        if (selectedUser != null && !string.IsNullOrWhiteSpace(selectedMembershipId))
+        {
+            try
+            {
+                var selectedMembership = memberships?.FirstOrDefault(m => m._id == selectedMembershipId);
+                if (selectedMembership != null)
+                {
+                    var newUserMembership = new UserMemberships
+                        {
+                            user_id = selectedUser._id,
+                            name = selectedUser.name,
+                            CNP = selectedUser.CNP,
+                            membership_id = selectedMembership._id,
+                            megnevezes = selectedMembership.megnevezes
+                        };
+
+                    
+                    await userMembershipsService.CreateEntry(newUserMembership);
+                    Console.WriteLine($"Added new user membership for user {selectedUser.name}");
+                   
+
+                    // Clear the input fields
+                    selectedUser = null;
+                    searchCNP = string.Empty;
+                    selectedMembershipId = string.Empty;
+                    await RefreshUserMemberships();
+                }
+                else
+                {
+                    Console.WriteLine("Selected membership not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding user membership: {ex.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Selected user or membership is null.");
+            
+        }
     }
 }
