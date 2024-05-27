@@ -13,8 +13,8 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
 
     public void SetAuthenticationState(Task<AuthenticationState> authenticationStateTask)
     {
-        var authState = authenticationStateTask.Result;
-        NotifyAuthenticationStateChanged(Task.FromResult(authState));
+        _anonymous = authenticationStateTask.Result.User;
+        NotifyAuthenticationStateChanged(authenticationStateTask);
     }
 
 }

@@ -26,12 +26,12 @@ namespace FitnessAppAPI.Services
 
             var claims = new List<Claim>
             {
-                new Claim("ID", user._id),
-                new Claim(ClaimTypes.Name, user.name),
-                new Claim("CNP", user.CNP), 
-                new Claim(ClaimTypes.Email, user.email),
-                new Claim("Phone", user.phone),
-                new Claim("Address", user.address),
+                new Claim(ClaimTypes.NameIdentifier, user._id ?? string.Empty),
+                new Claim(ClaimTypes.Name, user.name ?? string.Empty),
+                new Claim("CNP", user.CNP ?? string.Empty),
+                new Claim(ClaimTypes.Email, user.email ?? string.Empty),
+                new Claim("Phone", user.phone ?? string.Empty),
+                new Claim("Address", user.address ?? string.Empty),
                 new Claim(ClaimTypes.Role, user.admin == true ? "admin" : "user"),
 
             };
