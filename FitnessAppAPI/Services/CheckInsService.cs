@@ -55,28 +55,28 @@ namespace FitnessAppAPI.Services
                                 await _userMembershipsService.UpdateActiveStatus(userMembership._id, false);
                             }
 
-                            return "Check-in added successfully.";
+                            return "Sikeresen bejelentkezve.";
                         }
                         else
                         {
-                            return "Check-in limit exceeded.";
+                            return "A bejelentkezési limit meghaladva.";
                         }
                     }
                     else
                     {
-                        return "Membership is inactive.";
+                        return "A bérlet inaktív.";
                     }
 
                     
                 }
                 else
                 {
-                    return "Membership not found.";
+                    return "Bérlet nem található.";
                 }
             }
             else
             {
-                return "User membership not found.";
+                return "A felhasználói bérlet nem található.";
             }
         }
 

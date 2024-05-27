@@ -1,12 +1,17 @@
 ﻿@page "/profile"
 @using System.Security.Claims
+@using FitnessAppAPI.Models
+@using FitnessAppAPI.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider authenticationStateProvider
+@inject UserMembershipsService userMembershipsService
+@inject CheckInsService checkInsService
 
 <h3>Profil</h3>
 
 @if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
 {
+    <p>ID: @user.FindFirst("ID")?.Value</p>
     <p>Név: @user.Identity.Name</p>
     <p>CNP: @user.FindFirst("CNP")?.Value</p>
     <p>E-mail: @user.FindFirst(ClaimTypes.Email)?.Value</p>
@@ -18,12 +23,112 @@ else
     <p>Felhasználó nincs bejelentkezve.</p>
 }
 
+@if (userMemberships != null && userMemberships.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Név</th>
+                <th>CNP</th>
+                <th>Bérlet megnevezése</th>
+                <th>Előfizetés dátuma</th>
+                <th>Bejelentkezés számláló</th>
+                <th>Aktív</th>
+                <th>Műveletek</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var userMembership in userMemberships)
+            {
+                <tr>
+                    <td>@userMembership._id</td>
+                    <td>@userMembership.name</td>
+                    <td>@userMembership.CNP</td>
+                    <td>@userMembership.megnevezes</td>
+                    <td>@userMembership.purchase_date.ToString("yyyy-MM-dd")</td>
+                    <td>@userMembership.checkin_count</td>
+                    <td>@(userMembership.active == true ? "Aktív" : "Inaktív")</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => CheckIn(userMembership._id)">Bejelentkezés</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info mt-3">@message</div>
+}
+
 @code {
     private ClaimsPrincipal? user;
+    List<UserMemberships> userMemberships;
+    string message = "";
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         user = authState.User;
+
+
+        userMemberships = await userMembershipsService.GetAllByUserId(user.FindFirst("ID").Value);
+        await userMembershipsService.CheckExpirationDate();
+    }
+
+    private async Task CheckIn(string userMembershipId)
+    {
+        if (!string.IsNullOrWhiteSpace(userMembershipId))
+        {
+            try
+            {
+                var userMembership = await userMembershipsService.GetEntryById(userMembershipId);
+                if (userMembership != null)
+                {
+                    var checkIn = new CheckIns
+                        {
+                            name = userMembership.name,
+                            CNP = userMembership.CNP,
+                            membership_id = userMembership.membership_id,
+                            user_membership_id = userMembership._id,
+                            megnevezes = userMembership.megnevezes,
+                            checkin_date = DateTime.Now
+                        };
+                    message = await checkInsService.CreateEntry(checkIn);
+                    RefreshUserMemberships();
+                }
+                else
+                {
+                    Console.WriteLine("A felhasználói bérlet nem található.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hibás bejelentkezés: {ex.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Nincs felhasználói bérlet ID megadva.");
+        }
+    }
+
+    private async Task RefreshUserMemberships()
+    {
+        try
+        {
+            userMemberships = await userMembershipsService.GetAllByUserId(user.FindFirst("ID").Value);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Hiba a frissítéskor: {ex.Message}");
+        }
     }
 }

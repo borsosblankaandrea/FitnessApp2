@@ -28,9 +28,16 @@ namespace FitnessAppAPI.Services
         public async Task<List<UserMemberships>> GetAllEntries() =>
             await _userMembershipsCollection.Find(_ => true).ToListAsync();
 
+        public async Task<List<UserMemberships>> GetAllByUserId(string userId)
+        {
+            var filter = Builders<UserMemberships>.Filter.Eq(um => um.user_id, userId);
+            return await _userMembershipsCollection.Find(filter).ToListAsync();
+        }
+
+
         public async Task<UserMemberships?> GetEntryById(string id) =>
             await _userMembershipsCollection.Find(x => x._id == id).FirstOrDefaultAsync();
-
+       
 
         public async Task CreateEntry(UserMemberships newUserMemberships) =>
             await _userMembershipsCollection.InsertOneAsync(newUserMemberships);
@@ -58,7 +65,7 @@ namespace FitnessAppAPI.Services
                 var membership = await _membershipsService.GetMembershipById(userMembership.membership_id);
                 if (membership == null)
                 {
-                    throw new Exception("Membership not found.");
+                    throw new Exception("Bérlet nem található.");
                 }
 
                

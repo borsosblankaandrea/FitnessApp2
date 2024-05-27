@@ -1,0 +1,109 @@
+﻿@page "/buymemberships"
+@using FitnessAppAPI.Models
+@using FitnessAppAPI.Services
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject MembershipsService service
+@inject UserMembershipsService userMembershipsService
+@inject AuthenticationStateProvider authenticationStateProvider
+
+<h1>Bérletek</h1>
+
+<div class="row mb-3" style="width: 65%;">
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Megnevezés keresése" @bind="megnevezesFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Ár keresése" @bind="arFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Érvényesség keresése" @bind="ervenyessegFilter" />
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" placeholder="Belépések számának keresése" @bind="belepesekFilter" />
+    </div>
+</div>
+
+@if (memberships != null && memberships.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Megnevezés</th>
+                <th>Ár</th>
+                <th>Hány napig érvényes</th>
+                <th>Hány belépésre érvényes</th>
+                <th>Műveletek</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var membership in memberships.Where(m => string.IsNullOrWhiteSpace(megnevezesFilter) || m.megnevezes.Contains(megnevezesFilter, StringComparison.OrdinalIgnoreCase))
+           .Where(m => string.IsNullOrWhiteSpace(arFilter) || m.ar.ToString().Contains(arFilter, StringComparison.OrdinalIgnoreCase))
+           .Where(m => string.IsNullOrWhiteSpace(ervenyessegFilter) || m.hanynapigervenyes.ToString().Contains(ervenyessegFilter, StringComparison.OrdinalIgnoreCase))
+           .Where(m => string.IsNullOrWhiteSpace(belepesekFilter) || (m.hanybelepesreervenyes == 0 ? "Korlátlan" : m.hanybelepesreervenyes.ToString()).Contains(belepesekFilter, StringComparison.OrdinalIgnoreCase)))
+            {
+                <tr>
+                    <td>@membership.megnevezes</td>
+                    <td>@membership.ar</td>
+                    <td>@membership.hanynapigervenyes</td>
+                    <td>@(membership.hanybelepesreervenyes == 0 ? "Korlátlan" : membership.hanybelepesreervenyes.ToString())</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => BuyMembership(membership)">Vásárlás</button>
+                       
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info mt-3">@message</div>
+}
+
+
+
+@code {
+    List<Memberships> memberships;
+    Memberships newMembership = new Memberships();
+    Memberships editingMembership;
+    string message = "";
+
+    private ClaimsPrincipal? user;
+
+    string megnevezesFilter = "";
+    string arFilter = "";
+    string ervenyessegFilter = "";
+    string belepesekFilter = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        memberships = await service.GetAllMemberships();
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+    }
+
+
+    private async Task BuyMembership(Memberships membership)
+    {
+        var newUserMembership = new UserMemberships
+       {
+           user_id = user.FindFirstValue("ID"),
+           name = user.Identity.Name,
+           CNP = user.FindFirstValue("CNP"),
+           membership_id = membership._id,
+           megnevezes = membership.megnevezes
+        };
+
+        await userMembershipsService.CreateEntry(newUserMembership);
+        message = "Bérlet sikeresen megvéve.";
+
+    }
+
+}

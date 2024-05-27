@@ -26,7 +26,7 @@ namespace FitnessAppAPI.Services
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user._id ?? string.Empty),
+                new Claim("ID", user._id ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.name ?? string.Empty),
                 new Claim("CNP", user.CNP ?? string.Empty),
                 new Claim(ClaimTypes.Email, user.email ?? string.Empty),
