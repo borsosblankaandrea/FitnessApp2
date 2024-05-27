@@ -16,6 +16,10 @@
     
 </div>
 
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info mt-3">@message</div>
+}
 
 <br />
 @if (checkIns != null && checkIns.Any())
@@ -33,7 +37,7 @@
             @foreach (var checkIn in checkIns)
             {
                 <tr>
-                    <td>@checkIn.checkin_date?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@checkIn.checkin_date.ToString("yyyy-MM-dd HH:mm:ss")</td>
                     <td>@checkIn.name</td>
                     <td>@checkIn.CNP</td>
                     <td>@checkIn.megnevezes</td>
@@ -51,6 +55,7 @@ else
 @code {
     List<CheckIns> checkIns;
     string userMembershipId;
+    string message;
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,11 +76,13 @@ else
                             name = userMembership.name,
                             CNP = userMembership.CNP,
                             membership_id = userMembership.membership_id,
+                            user_membership_id = userMembership._id,
                             megnevezes = userMembership.megnevezes,
-                            checkin_date = DateTime.UtcNow
+                            checkin_date = DateTime.Now
                         };
 
-                    await checkInsService.CreateEntry(checkIn);
+                    message = await checkInsService.CreateEntry(checkIn);
+                    // await checkInsService.CreateEntry(checkIn);
                     await RefreshCheckIns();
                     userMembershipId = ""; 
                 }

@@ -19,7 +19,7 @@ namespace FitnessAppAPI.Models
         public string? membership_id { get; set; }
 
         public string? megnevezes { get; set; }
-        public DateTime? purchase_date { get; set; } = DateTime.UtcNow;
+        public DateTime purchase_date { get; set; } = DateTime.Now;
         public int? checkin_count { get; set; } = 0;
         public bool? active { get; set; } = true;
     }

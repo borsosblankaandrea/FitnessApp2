@@ -40,7 +40,7 @@
                     <td>@userMembership.name</td>
                     <td>@userMembership.CNP</td>
                     <td>@userMembership.megnevezes</td>
-                    <td>@userMembership.purchase_date?.ToString("yyyy-MM-dd")</td>
+                    <td>@userMembership.purchase_date.ToString("yyyy-MM-dd")</td>
                     <td>@userMembership.checkin_count</td>
                     <td>@(userMembership.active == true ? "Aktív" : "Inaktív")</td>
                     <td>
@@ -109,6 +109,7 @@ else
         {
             userMemberships = await userMembershipsService.GetAllEntries();
             memberships = await membershipsService.GetAllMemberships();
+            await userMembershipsService.CheckExpirationDate();
             Console.WriteLine("User memberships and memberships loaded successfully.");
         }
         catch (Exception ex)

@@ -8,8 +8,10 @@ namespace FitnessAppAPI.Services
     public class CheckInsService
     {
         private readonly IMongoCollection<CheckIns> _checkInsCollection;
+        private readonly UserMembershipsService _userMembershipsService;
+        private readonly MembershipsService _membershipsService;
 
-        public CheckInsService(IOptions<DatabaseSetting> fitnessAppDatabaseSetting)
+        public CheckInsService(IOptions<DatabaseSetting> fitnessAppDatabaseSetting, UserMembershipsService userMembershipsService, MembershipsService membershipsService)
         {
             var connectionString = "mongodb+srv://user:passwordka123@cluster0.lfiztow.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
             var databaseName = "FitnessDatabase";
@@ -17,6 +19,8 @@ namespace FitnessAppAPI.Services
             var mongoClient = new MongoClient(connectionString);
             var mongoDatabase = mongoClient.GetDatabase(databaseName);
             _checkInsCollection = mongoDatabase.GetCollection<CheckIns>("CheckIns");
+            _userMembershipsService = userMembershipsService;
+            _membershipsService = membershipsService;
 
             //var mongoClient = new MongoClient(fitnessAppDatabaseSetting.Value.ConnectionString);
             //var mongoDatabase = mongoClient.GetDatabase(fitnessAppDatabaseSetting.Value.DatabaseName);
@@ -29,8 +33,52 @@ namespace FitnessAppAPI.Services
         public async Task<CheckIns?> GetEntryById(string id) =>
             await _checkInsCollection.Find(x => x._id == id).FirstOrDefaultAsync();
 
-        public async Task CreateEntry(CheckIns newCheckIn) =>
-            await _checkInsCollection.InsertOneAsync(newCheckIn);
+        //public async Task CreateEntry(CheckIns newCheckIn) =>
+        //    await _checkInsCollection.InsertOneAsync(newCheckIn);
+
+        public async Task<string> CreateEntry(CheckIns newCheckIn)
+        {
+            var userMembership = await _userMembershipsService.GetEntryById(newCheckIn.user_membership_id);
+            if (userMembership != null)
+            {
+                var membership = await _membershipsService.GetMembershipById(userMembership.membership_id);
+                if (membership != null)
+                {
+                    if(userMembership.active == true) { 
+                        if (userMembership.checkin_count < membership.hanybelepesreervenyes || membership.hanybelepesreervenyes == 0)
+                        {
+                            await _checkInsCollection.InsertOneAsync(newCheckIn);
+                            await _userMembershipsService.IncrementCheckinCount(newCheckIn.user_membership_id);
+
+                            if (userMembership.checkin_count + 1 == membership.hanybelepesreervenyes)
+                            {
+                                await _userMembershipsService.UpdateActiveStatus(userMembership._id, false);
+                            }
+
+                            return "Check-in added successfully.";
+                        }
+                        else
+                        {
+                            return "Check-in limit exceeded.";
+                        }
+                    }
+                    else
+                    {
+                        return "Membership is inactive.";
+                    }
+
+                    
+                }
+                else
+                {
+                    return "Membership not found.";
+                }
+            }
+            else
+            {
+                return "User membership not found.";
+            }
+        }
 
         public async Task UpdateEntry(string id, CheckIns updatedCheckIn) =>
             await _checkInsCollection.ReplaceOneAsync(x => x._id == id, updatedCheckIn);
