@@ -33,6 +33,9 @@ namespace FitnessAppAPI.Services
         public async Task<Users?> GetEntryByCnp(string cnp) =>
           await _usersCollection.Find(x => x.CNP == cnp).FirstOrDefaultAsync();
 
+        public async Task<Users?> GetEntryByEmail(string email) =>
+         await _usersCollection.Find(x => x.email == email).FirstOrDefaultAsync();
+
         public async Task<Users?> GetEntryByPhone(string phone) =>
           await _usersCollection.Find(x => x.phone == phone).FirstOrDefaultAsync();
 

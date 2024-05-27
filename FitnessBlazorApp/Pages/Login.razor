@@ -1,0 +1,42 @@
+﻿@page "/login"
+@using FitnessAppAPI.Services
+@inject AuthenticationService AuthenticationService
+@inject NavigationManager Navigation
+
+<h3>Login</h3>
+
+<div>
+    <label>Email:</label>
+    <input @bind="email" />
+</div>
+<div>
+    <label>Password:</label>
+    <input type="password" @bind="password" />
+</div>
+<button @onclick="HandleLogin">Login</button>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info mt-3">@message</div>
+}
+
+@code {
+    private string email;
+    private string password;
+    string message;
+
+    private async Task HandleLogin()
+    {
+        var result = await AuthenticationService.Login(email, password);
+        if (result)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            message = "Helytelen jelszó vagy email.";
+            email = "";
+            password = "";
+        }
+    }
+}

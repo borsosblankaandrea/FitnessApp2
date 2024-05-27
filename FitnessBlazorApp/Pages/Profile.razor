@@ -1,0 +1,29 @@
+﻿@page "/profile"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider authenticationStateProvider
+
+<h3>Profil</h3>
+
+@if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+{
+    <p>Név: @user.Identity.Name</p>
+    <p>CNP: @user.FindFirst("CNP")?.Value</p>
+    <p>E-mail: @user.FindFirst(ClaimTypes.Email)?.Value</p>
+    <p>Telefonszám: @user.FindFirst("Phone")?.Value</p>
+    <p>Cím: @user.FindFirst("Address")?.Value</p>
+}
+else
+{
+    <p>Felhasználó nincs bejelentkezve.</p>
+}
+
+@code {
+    private ClaimsPrincipal? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+    }
+}

@@ -1,5 +1,6 @@
 using FitnessAppAPI.Models;
 using FitnessAppAPI.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +12,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<DatabaseSetting>(builder.Configuration.GetSection("FitnessAppDatabase"));
-builder.Services.AddSingleton<UsersService>();
+builder.Services.AddScoped<UsersService>();
 builder.Services.AddSingleton<MembershipsService>();
 builder.Services.AddSingleton<UserMembershipsService>();
 builder.Services.AddSingleton<CheckInsService>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationService>();
 
 var app = builder.Build();
 

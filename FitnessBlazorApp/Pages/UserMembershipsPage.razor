@@ -1,4 +1,5 @@
 ﻿@page "/usermemberships"
+@attribute [Authorize(Roles = "admin")]
 @using FitnessAppAPI.Models
 @using FitnessAppAPI.Services
 @inject UserMembershipsService userMembershipsService

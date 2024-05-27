@@ -1,6 +1,7 @@
 using FitnessAppAPI.Services;
 using FitnessBlazorApp.Data;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,8 @@ builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<MembershipsService>();
 builder.Services.AddScoped<UserMembershipsService>();
 builder.Services.AddScoped<CheckInsService>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationService>();
 
 
 

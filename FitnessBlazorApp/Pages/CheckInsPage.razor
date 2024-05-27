@@ -1,8 +1,10 @@
 ﻿@page "/checkins"
+@attribute [Authorize(Roles = "admin")]
 @using FitnessAppAPI.Models
 @using FitnessAppAPI.Services
 @inject CheckInsService checkInsService
 @inject UserMembershipsService userMembershipsService
+
 
 <h1>Bejelentkezések</h1>
 
@@ -88,17 +90,17 @@ else
                 }
                 else
                 {
-                    Console.WriteLine("User membership not found with the provided ID.");
+                    Console.WriteLine("A felhasználói bérlet nem található.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error adding check-in: {ex.Message}");
+                Console.WriteLine($"Hibás bejelentkezés: {ex.Message}");
             }
         }
         else
         {
-            Console.WriteLine("User membership ID is empty.");
+            Console.WriteLine("Nincs felhasználói bérlet ID megadva.");
         }
     }
 

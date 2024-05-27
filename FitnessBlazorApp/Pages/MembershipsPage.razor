@@ -1,4 +1,5 @@
 ﻿@page "/memberships"
+@attribute [Authorize(Roles = "admin")]
 @using FitnessAppAPI.Models
 @using FitnessAppAPI.Services
 
