@@ -11,12 +11,12 @@
 
 @if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
 {
-    <p>ID: @user.FindFirst("ID")?.Value</p>
-    <p>Név: @user.Identity.Name</p>
-    <p>CNP: @user.FindFirst("CNP")?.Value</p>
-    <p>E-mail: @user.FindFirst(ClaimTypes.Email)?.Value</p>
-    <p>Telefonszám: @user.FindFirst("Phone")?.Value</p>
-    <p>Cím: @user.FindFirst("Address")?.Value</p>
+    <p><strong>ID:</strong> @user.FindFirst("ID")?.Value</p>
+    <p><strong>Név:</strong> @user.Identity.Name</p>
+    <p><strong>CNP:</strong> @user.FindFirst("CNP")?.Value</p>
+    <p><strong>E-mail:</strong> @user.FindFirst(ClaimTypes.Email)?.Value</p>
+    <p><strong>Telefonszám:</strong> @user.FindFirst("Phone")?.Value</p>
+    <p><strong>Cím:</strong> @user.FindFirst("Address")?.Value</p>
 }
 else
 {
