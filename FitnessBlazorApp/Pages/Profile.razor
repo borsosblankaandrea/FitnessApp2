@@ -50,7 +50,7 @@ else
                     <td>@userMembership.checkin_count</td>
                     <td>@(userMembership.active == true ? "Aktív" : "Inaktív")</td>
                     <td>
-                        <button class="btn btn-danger" @onclick="() => CheckIn(userMembership._id)">Bejelentkezés</button>
+                        <button class="btn btn-danger" style="background-color: #ff4500;" @onclick="() => CheckIn(userMembership._id)">Bejelentkezés</button>
                     </td>
                 </tr>
             }
